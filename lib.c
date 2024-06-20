@@ -2636,6 +2636,7 @@ uc_require_ucode(uc_vm_t *vm, const char *path, uc_value_t *scope, uc_value_t **
 	uc_parse_config_t config = *vm->config, *prev_config = vm->config;
 	uc_value_t *closure;
 	struct stat st;
+	bool rv = true;
 
 	if (stat(path, &st))
 		return false;
@@ -2655,15 +2656,18 @@ uc_require_ucode(uc_vm_t *vm, const char *path, uc_value_t *scope, uc_value_t **
 		uc_vm_stack_push(vm, scope);
 
 		*res = uc_callfunc(vm, 3);
+		rv = (vm->exception.type == EXCEPTION_NONE);
 
-		uc_vm_stack_pop(vm);
-		uc_vm_stack_pop(vm);
-		uc_vm_stack_pop(vm);
+		if (vm->stack.count >= 3) {
+			uc_vm_stack_pop(vm);
+			uc_vm_stack_pop(vm);
+			uc_vm_stack_pop(vm);
+		}
 	}
 
 	vm->config = prev_config;
 
-	return true;
+	return rv;
 }
 
 static bool
