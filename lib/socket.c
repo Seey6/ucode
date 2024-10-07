@@ -78,7 +78,7 @@
 
 #if defined(__linux__)
 # include <linux/if_packet.h>
-
+#include <linux/version.h>
 # ifndef SO_TIMESTAMP_OLD
 #  define SO_TIMESTAMP_OLD SO_TIMESTAMP
 # endif
@@ -1396,6 +1396,7 @@ static struct_t st_tpacket_auxdata = {
 	}
 };
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
 static struct_t st_fanout_args = {
 	.size = sizeof(struct fanout_args),
 	.members = (member_t []){
@@ -1405,6 +1406,7 @@ static struct_t st_fanout_args = {
 		{ 0 }
 	}
 };
+#endif
 
 struct timeval_old_local {
 	long tv_sec;
@@ -1625,7 +1627,9 @@ static sockopt_t sockopts[] = {
 	{ SOL_PACKET, PACKET_ADD_MEMBERSHIP, &st_packet_mreq },
 	{ SOL_PACKET, PACKET_DROP_MEMBERSHIP, &st_packet_mreq },
 	{ SOL_PACKET, PACKET_AUXDATA, SV_BOOL },
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
 	{ SOL_PACKET, PACKET_FANOUT, &st_fanout_args },
+	#endif
 	{ SOL_PACKET, PACKET_LOSS, SV_BOOL },
 	{ SOL_PACKET, PACKET_RESERVE, SV_INT },
 	{ SOL_PACKET, PACKET_RX_RING, &st_tpacket_req },
@@ -5091,7 +5095,9 @@ void uc_module_init(uc_vm_t *vm, uc_value_t *scope)
 	ADD_CONST(PACKET_ADD_MEMBERSHIP);
 	ADD_CONST(PACKET_DROP_MEMBERSHIP);
 	ADD_CONST(PACKET_AUXDATA);
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
 	ADD_CONST(PACKET_FANOUT);
+	#endif
 	ADD_CONST(PACKET_LOSS);
 	ADD_CONST(PACKET_RESERVE);
 	ADD_CONST(PACKET_RX_RING);
